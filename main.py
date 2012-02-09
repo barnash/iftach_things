@@ -37,7 +37,6 @@ class MyConnection(tornadio2.SocketConnection):
             c._send_current_slide()
 
     def _send_current_slide(self):
-        print "sending ", MyConnection.slide
         self.emit("slide", MyConnection.slide)
 
     def on_close(self):

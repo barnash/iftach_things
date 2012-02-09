@@ -15,7 +15,6 @@ var PR = PR || {
 
 function join() {
     /* TODO try to load a cookie, and if it doesn't exist create a random cookie id */
-    console.log("join");
     $("#join_button_loader").show();
     
     PR.socket = io.connect('http://localhost:8888');
@@ -29,22 +28,23 @@ function join() {
 }
 
 function reloadSlide(data) {
-    console.log("reload slide");
     PR.data = data;
+    console.log("reload slide!");
     if (PR.data == null) {
+        console.log("data was null");
         $(".slide").hide();
         $("#waiting_div").show();
     } else {
+        console.log("data was not null!");
         $(".slide_number").text(PR.data.slide_number);
         $(".slide_header").text(PR.data.slide_header);
-        $("#slide").show();
+        $(".slide").show();
         $("#waiting_div").hide();
         /* TODO reload the like button */
     }
 }
 
 function likeIt() {
-    console.log("like it!");
     PR.socket.emit("like", PR.data.slide_number);
 }
 

@@ -28,8 +28,9 @@ function join() {
 }
 
 function addLike(slide_number) {
+    s = slide_number;
     if (slide_number == PR.data.slide_number) {
-        PR.data.likes = PR.data.likes + 1;
+        PR.likes = PR.likes + 1;
         reloadSlide()
     }
 }
