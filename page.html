@@ -21,20 +21,25 @@ function join() {
     PR.socket = io.connect('http://localhost:8888');
 
     /* TODO What if I couldn't connect? */
-    PR.socket.on("slide", function(data) {
-        PR.data = data;
-        reloadSlide();
-    })
+    PR.socket.on("slide", reloadSlide);
 
     $("#connected_div").show();
     $("#join_button").hide();
     $("#join_button_loader").hide();
 }
 
-function reloadSlide() {
-    $(".slide_number").text(PR.data.slide_number);
-    $(".slide_header").text(PR.data.slide_header);
-    /* TODO reload the like button */
+function reloadSlide(data) {
+    PR.data = data;
+    if (PR.data == null) {
+        $(".slide").hide();
+        $("#waiting_div").show();
+    } else {
+        $(".slide_number").text(PR.data.slide_number);
+        $(".slide_header").text(PR.data.slide_header);
+        $("#slide").show();
+        $("#waiting_div").hide();
+        /* TODO reload the like button */
+    }
 }
 
 function likeIt() {
@@ -49,9 +54,12 @@ $(function() {
 </head>
 <body>
 <div id="connected_div" style="display: None">
-    <div class="slide_number"></div>
-    <div class="slide_header"></div>
-    <div class="like_button" onclick="likeIt()">Like</div>
+    <div id="waiting_div" style="display: None">Waiting for host to join...</div>
+    <div class="slide">
+        <div class="slide_number"></div>
+        <div class="slide_header"></div>
+        <div class="like_button" onclick="likeIt()">Like</div>
+    </div>
 </div>
 <div id="join_button" class="button" onclick="join()">
     Click to join the presentation
