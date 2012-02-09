@@ -1,17 +1,61 @@
 <html>
 <head><title>socket io demo</title>
+<link rel="stylesheet" href="/static/css/style.css"/>
 <script src="/static/js/jquery-1.7.1.min.js"></script>
 <script src="/static/js/socket.io.js"></script>
 <script>
-console.log("sasd");
-var socket = io.connect('http://localhost');
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-  });
+
+var PR = PR || {
+    socket: null,
+    data: {
+        slide_number: null,
+        slide_header: null
+    }
+};
+
+function join() {
+    /* TODO try to load a cookie, and if it doesn't exist create a random cookie id */
+    console.log("join");
+    $("#join_button_loader").show();
+    
+    PR.socket = io.connect('http://localhost:8888');
+
+    /* TODO What if I couldn't connect? */
+    PR.socket.on("slide", function(data) {
+        PR.data = data;
+        reloadSlide();
+    })
+
+    $("#connected_div").show();
+    $("#join_button").hide();
+    $("#join_button_loader").hide();
+}
+
+function reloadSlide() {
+    $(".slide_number").text(PR.data.slide_number);
+    $(".slide_header").text(PR.data.slide_header);
+    /* TODO reload the like button */
+}
+
+function likeIt() {
+    console.log("like it!");
+    PR.socket.emit("like");
+}
+
+$(function() {
+    console.log("face loaded");
+})
 </script>
 </head>
 <body>
-This is my cool text
+<div id="connected_div" style="display: None">
+    <div class="slide_number"></div>
+    <div class="slide_header"></div>
+    <div class="like_button" onclick="likeIt()">Like</div>
+</div>
+<div id="join_button" class="button" onclick="join()">
+    Click to join the presentation
+</div>
+<div id="join_button_loader" class="ajax_loader"></div>
 </body>
 </html>
