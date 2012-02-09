@@ -3,44 +3,53 @@ import tornado.web as web
 import tornadio2
 
 class MyConnection(tornadio2.SocketConnection):
-    clients = set()
-    master = None
-    slide = None
 
-    def on_open(self, info):
-        self.clients.add(self)
-        self._send_current_slide()
+    @classmethod
+    def init(cls):
+        cls.clients = set()
+        cls.master = None
+        cls.slide = None
+
+    def on_open(self, request):
+        host = request.get_argument("host")
+        if host and host == "ron":
+            MyConnection.master = self
+        else:
+            MyConnection.clients.add(self)
+            self._send_current_slide()
 
     @tornadio2.event("like")
-    def on_like(self, slide):
-        if self.master is not None:
-            self.master.emit("like", slide)
+    def on_like(self, slide_number):
+        if MyConnection.master is not None:
+            MyConnection.master.emit("like", slide_number)
 
     @tornadio2.event("slide_transfer")
-    def on_slide_transfer(self):
-        if self is not self.master:
+    def on_slide_transfer(self, slide_header, slide_number):
+        if self is not MyConnection.master:
             return
 
-        self.slide = {"slide_number": 2, "slide_header" : "My first cool slide"}
+        MyConnection.slide = {"slide_header" : slide_header, "slide_number" : slide_number}
 
         self._update_clients()
 
     def _update_clients(self):
-        for c in self.clients:
+        for c in MyConnection.clients:
             c._send_current_slide()
 
     def _send_current_slide(self):
-        self.emit("slide", self.slide)
+        print "sending ", MyConnection.slide
+        self.emit("slide", MyConnection.slide)
 
     def on_close(self):
-        if self is self.master:
-            self.slide = None
-            self.master = None
+        if self is MyConnection.master:
+            MyConnection.slide = None
+            MyConnection.master = None
             self._update_clients()
         else:
-            self.clients.remove(self)
+            MyConnection.clients.remove(self)
 
 MyRouter = tornadio2.TornadioRouter(MyConnection)
+MyConnection.init()
 
 routes = [
     (r"/static/(.*)", web.StaticFileHandler, {"path": "./static"}),

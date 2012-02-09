@@ -29,6 +29,7 @@ function join() {
 }
 
 function reloadSlide(data) {
+    console.log("reload slide");
     PR.data = data;
     if (PR.data == null) {
         $(".slide").hide();
@@ -44,12 +45,13 @@ function reloadSlide(data) {
 
 function likeIt() {
     console.log("like it!");
-    PR.socket.emit("like");
+    PR.socket.emit("like", PR.data.slide_number);
 }
 
 $(function() {
-    console.log("face loaded");
+    
 })
+    
 </script>
 </head>
 <body>
