@@ -1,0 +1,17 @@
+<html>
+<head><title>socket io demo</title>
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="/static/js/socket.io.js"></script>
+<script>
+console.log("sasd");
+var socket = io.connect('http://localhost');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>
+</head>
+<body>
+This is my cool text
+</body>
+</html>
