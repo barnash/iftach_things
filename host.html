@@ -14,6 +14,9 @@ var PR = PR || {
     }
 };
 
+
+/* --- Server methods --- */
+
 function connect() {
     PR.socket = io.connect('http://localhost:8888?host=ron');
     /* TODO What if I couldn't connect? */
@@ -30,6 +33,8 @@ function sendSlideToServer(slide_number, slide_header) {
 function getLikes(slide_number, callback) {
     PR.socket.emit("get_likes", {slide_number: slide_number}, callback);
 }
+
+/* --- End server methods --- */
 
 function addLike(slide_number) {
     s = slide_number;

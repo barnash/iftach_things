@@ -13,14 +13,27 @@ var PR = PR || {
     }
 };
 
-function join() {
-    /* TODO try to load a cookie, and if it doesn't exist create a random cookie id */
-    $("#join_button_loader").show();
-    
+
+/* --- Server methods --- */
+
+function connect() {
     PR.socket = io.connect('http://localhost:8888');
 
     /* TODO What if I couldn't connect? */
     PR.socket.on("slide", reloadSlide);
+}
+
+function like(slide_number) {
+    PR.socket.emit("like", slide_number);
+}
+
+/* --- End server methods --- */
+
+function join() {
+    /* TODO try to load a cookie, and if it doesn't exist create a random cookie id */
+    $("#join_button_loader").show();
+
+    connect();
 
     $("#connected_div").show();
     $("#join_button").hide();
@@ -45,7 +58,7 @@ function reloadSlide(data) {
 }
 
 function likeIt() {
-    PR.socket.emit("like", PR.data.slide_number);
+    like(PR.data.slide_number);
 }
 
 $(function() {
