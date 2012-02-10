@@ -14,17 +14,21 @@ var PR = PR || {
     }
 };
 
-function join() {
-    $("#join_button_loader").show();
-    
+function connect() {
     PR.socket = io.connect('http://localhost:8888?host=ron');
-
     /* TODO What if I couldn't connect? */
+    
     PR.socket.on("like", addLike);
+}
 
-    $("#connected_div").show();
-    $("#join_button").hide();
-    $("#join_button_loader").hide();
+function sendSlideToServer(slide_number, slide_header) {
+    PR.socket.emit("slide_transfer",
+            {slide_number : slide_number,
+            slide_header : slide_header});
+}
+
+function getLikes(slide_number, callback) {
+    PR.socket.emit("get_likes", {slide_number: slide_number}, callback);
 }
 
 function addLike(slide_number) {
@@ -35,6 +39,26 @@ function addLike(slide_number) {
     }
 }
 
+function join() {
+    $("#join_button_loader").show();
+    
+    connect();
+
+    $("#connected_div").show();
+    $("#join_button").hide();
+    $("#join_button_loader").hide();
+}
+
+function updateServer() {
+    getLikes(PR.data.slide_number, function(likes) {
+        PR.likes = likes;
+        reloadSlide();
+    });
+
+    reloadSlide();
+    sendSlideToServer(PR.data.slide_number, PR.data.slide_header);
+}
+
 function nextSlide() {
     if (PR.data == null || PR.data.slide_number == null) {
         PR.data = {"slide_number" : 1, "slide_header" : "1 slide"};
@@ -42,13 +66,21 @@ function nextSlide() {
         var new_slide_number = PR.data.slide_number + 1;
         PR.data = {"slide_number" : new_slide_number, "slide_header" : new_slide_number + " slide"};
     }
-    PR.socket.emit("get_likes", {slide_number: PR.data.slide_number}, function(likes) {
-        PR.likes = likes;
-        reloadSlide();
-    });
-    reloadSlide();
 
-    PR.socket.emit("slide_transfer", PR.data);
+    updateServer();
+}
+
+function prevSlide() {
+    if (PR.data == null || PR.data.slide_number == null) {
+        PR.data = {"slide_number" : 1, "slide_header" : "1 slide"};
+    } else if (PR.data.slide_number == 1) {
+        /* TODO maybe error or something, but basically do nothing */
+    } else {
+        var new_slide_number = PR.data.slide_number - 1;
+        PR.data = {"slide_number" : new_slide_number, "slide_header" : new_slide_number + " slide"};
+    }
+
+    updateServer();
 }
 
 function reloadSlide() {
@@ -70,6 +102,9 @@ $(function() {
 </div>
 <div id="nextSlide" class="button" onclick="nextSlide()">
     Next slide
+</div>
+<div id="prevSlide" class="button" onclick="prevSlide()">
+    Prev slide
 </div>
 </body>
 </html>
